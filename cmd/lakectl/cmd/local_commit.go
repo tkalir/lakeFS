@@ -85,6 +85,7 @@ var localCommitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := getClient()
 		_, localPath := getSyncArgs(args, false, false)
+		useCfgParallelismIfNotOverriden(cmd, cfg.Local.Commit.Parallelism)
 		syncFlags := getSyncFlags(cmd, client)
 		message, kvPairs := getCommitFlags(cmd)
 		force := Must(cmd.Flags().GetBool(localForceFlagName))

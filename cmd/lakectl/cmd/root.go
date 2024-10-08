@@ -98,6 +98,9 @@ type Configuration struct {
 	Local struct {
 		// SkipNonRegularFiles - By default lakectl local fails if local directory contains a symbolic link. When set, lakectl will ignore the symbolic links instead.
 		SkipNonRegularFiles bool `mapstructure:"skip_non_regular_files"`
+		Commit struct {
+		  Parallelism int `mapstructure:"parallelism"`
+		} `mapstructure:"commit"`
 	} `mapstructure:"local"`
 	// Experimental - Use caution when enabling experimental features. It should only be used after consulting with the lakeFS team!
 	Experimental struct {
@@ -536,6 +539,13 @@ func getEnvNoColor() bool {
 	return v != "" && v != "0"
 }
 
+//call this function before getSyncFlags to use value from cfg if not overriden by cmd flag
+func useCfgParallelismIfNotOverriden(cmd *cobra.Command, cfgParallelism int) {
+    if !cmd.Flags().Changed(parallelismFlagName) {
+      cmd.Flags().Set(parallelismFlagName, fmt.Sprintf("%d", cfgParallelism))
+    }
+}
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
@@ -574,6 +584,7 @@ func initConfig() {
 	viper.SetDefault("server.retries.min_wait_interval", defaultMinRetryInterval)
 	viper.SetDefault("experimental.local.posix_permissions.enabled", false)
 	viper.SetDefault("local.skip_non_regular_files", false)
+  viper.SetDefault("local.commit.parallelism", defaultSyncParallelism)
 
 	cfgErr = viper.ReadInConfig()
 }
