@@ -2897,6 +2897,10 @@ func (g *Graveler) Merge(ctx context.Context, repository *RepositoryRecord, dest
 		if err != nil {
 			return nil, err
 		}
+		baseCommitId := CommitID(ident.NewHexAddressProvider().ContentAddress(baseCommit))
+		if fromCommit.CommitID == baseCommitId {
+			return nil, ErrAlreadyUpToDate
+		}
 		lg.WithFields(logging.Fields{
 			"source_meta_range":      fromCommit.MetaRangeID,
 			"destination_meta_range": toCommit.MetaRangeID,
